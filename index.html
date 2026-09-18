@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>STAX Shop</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f5f7fa;color:#17202a}
+header{background:#07131d;color:#fff;padding:14px 5%;display:flex;gap:14px;align-items:center;position:sticky;top:0;z-index:5}.brand{font-weight:900;font-size:25px}.brand span{color:#ffd21c}
+.search{flex:1;display:flex}.search input{width:100%;padding:12px;border:0;border-radius:22px 0 0 22px}.search button{border:0;background:#ffd21c;padding:0 18px;border-radius:0 22px 22px 0}
+button{cursor:pointer;border:0;border-radius:8px;padding:10px 14px;font-weight:700}.yellow{background:#ffd21c}.dark{background:#07131d;color:white}.nav{background:white;padding:11px 5%;display:flex;gap:22px;overflow:auto;border-bottom:1px solid #ddd}.nav a{color:#222;text-decoration:none;white-space:nowrap}
+.wrap{max-width:1200px;margin:auto;padding:22px}.hero{background:linear-gradient(110deg,#07131d,#20435c);color:white;border-radius:18px;padding:38px;display:flex;justify-content:space-between;align-items:center}.hero h1{font-size:42px;margin:0 0 10px}.heroart{font-size:70px}
+h2{margin:28px 0 14px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.cat,.card,.panel{background:white;border:1px solid #e2e6ea;border-radius:14px}.cat{text-align:center;padding:20px;font-weight:800}.pic{height:160px;background:#eef2f5;display:flex;align-items:center;justify-content:center;font-size:60px}.info{padding:14px}.price{font-weight:900;font-size:19px;margin:8px 0}.add{width:100%;background:#ffd21c}
+footer{margin-top:40px;background:#07131d;color:#ddd;padding:35px 6%}.modal{display:none;position:fixed;inset:0;background:#0008;z-index:20;align-items:center;justify-content:center;padding:20px}.modal.show{display:flex}.box{background:#fff;border-radius:16px;padding:24px;width:min(600px,100%);max-height:90vh;overflow:auto}.field{width:100%;padding:12px;margin:7px 0;border:1px solid #ccd3da;border-radius:8px}.row{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid #eee;padding:12px 0}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}.statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.stat{padding:18px;background:#f4f6f8;border-radius:12px}.muted{color:#69737d}
+@media(max-width:800px){.grid{grid-template-columns:repeat(2,1fr)}.statgrid{grid-template-columns:repeat(2,1fr)}.hero h1{font-size:30px}}@media(max-width:500px){header{flex-wrap:wrap}.search{order:3;flex-basis:100%}.grid{grid-template-columns:1fr 1fr}.hero{padding:25px}.heroart{font-size:45px}}
+</style>
+</head>
+<body>
+<header>
+<div class="brand">🛒 STAX<span>Shop</span></div>
+<div class="search"><input id="search" placeholder="Search products..." oninput="renderProducts()"><button>⌕</button></div>
+<button class="dark" onclick="account()">👤 Account</button>
+<button class="yellow" onclick="openCart()">🛒 <span id="cartCount">0</span></button>
+</header>
+<div class="nav"><a href="#">Home</a><a href="#categories">Categories</a><a href="#products">Deals</a><a href="#products">Best Sellers</a><a href="#products">New Arrivals</a><a href="#" onclick="adminLogin();return false">Admin</a></div>
+<main class="wrap">
+<section class="hero"><div><h1>Big Deals.<br>Bigger Smiles!</h1><p>Everything you need, all in one place.</p><button class="yellow" onclick="document.getElementById('products').scrollIntoView()">Shop Now →</button></div><div class="heroart">📱 🎧 👟</div></section>
+<h2>Shop by Category</h2>
+<section id="categories" class="grid">
+<div class="cat">👕<br>Fashion</div><div class="cat">📱<br>Phones & Accessories</div><div class="cat">🎧<br>Electronics</div><div class="cat">👟<br>Shoes</div>
+<div class="cat">💄<br>Beauty</div><div class="cat">🏠<br>Home & Living</div><div class="cat">⌚<br>Gadgets</div><div class="cat">🛒<br>Groceries</div>
+</section>
+<h2>🔥 Today's Deals</h2><section id="products" class="grid"></section>
+</main>
+<footer><b>STAX<span style="color:#ffd21c">Shop</span></b><p>Everything you need, all in one place.</p><small>Prototype: payments, database and live hosting still need to be connected before public launch.</small></footer>
+<div id="modal" class="modal" onclick="if(event.target===this)closeModal()"><div id="box" class="box"></div></div>
+<script>
+const products=[
+["iPhone 15 (128GB)",520000,"📱","Phones"],["Wireless Earbuds",12500,"🎧","Electronics"],["Men's Sneakers",18000,"👟","Shoes"],["Smart Watch",25000,"⌚","Gadgets"],
+["Women's Dress",16500,"👗","Fashion"],["Men's Hoodie",14500,"🧥","Fashion"],["Backpack",12000,"🎒","Fashion"],["Bluetooth Speaker",22000,"🔊","Electronics"]];
+let cart=JSON.parse(localStorage.getItem("stax_cart")||"[]");
+let users=JSON.parse(localStorage.getItem("stax_users")||"[]");
+let orders=JSON.parse(localStorage.getItem("stax_orders")||"[]");
+const money=n=>"₦"+Number(n).toLocaleString("en-NG");
+function save(){localStorage.setItem("stax_cart",JSON.stringify(cart));localStorage.setItem("stax_users",JSON.stringify(users));localStorage.setItem("stax_orders",JSON.stringify(orders));document.getElementById("cartCount").textContent=cart.reduce((a,x)=>a+x.qty,0)}
+function renderProducts(){let q=document.getElementById("search").value.toLowerCase();document.getElementById("products").innerHTML=products.filter(p=>p[0].toLowerCase().includes(q)||p[3].toLowerCase().includes(q)).map((p,i)=>`<article class="card"><div class="pic">${p[2]}</div><div class="info"><b>${p[0]}</b><div>★★★★★ 4.7</div><div class="price">${money(p[1])}</div><small class="muted">${p[3]}</small><button class="add" onclick="add(${i})">Add to Cart</button></div></article>`).join("")}
+function add(i){let p=products[i],x=cart.find(a=>a.name===p[0]);x?x.qty++:cart.push({name:p[0],price:p[1],qty:1});save();alert("Added to cart!")}
+function openCart(){openModal();let total=cart.reduce((a,x)=>a+x.price*x.qty,0);document.getElementById("box").innerHTML=`<h2>Your Cart</h2>${cart.length?cart.map(x=>`<div class="row"><span>${x.name} × ${x.qty}</span><b>${money(x.price*x.qty)}</b></div>`).join("")+`<h3>Total: ${money(total)}</h3><button class="yellow" style="width:100%" onclick="checkout()">Checkout</button>`:"<p>Your cart is empty.</p>"}`}
+function checkout(){document.getElementById("box").innerHTML=`<h2>Checkout</h2><input id="cname" class="field" placeholder="Full name"><input id="cphone" class="field" placeholder="Phone number"><input id="caddress" class="field" placeholder="Delivery address"><button class="yellow" style="width:100%" onclick="placeOrder()">Place Order</button><p class="muted">Demo only: connect a real payment gateway before accepting public payments.</p>`}
+function placeOrder(){let n=document.getElementById("cname").value.trim(),ph=document.getElementById("cphone").value.trim(),ad=document.getElementById("caddress").value.trim();if(!n||!ph||!ad)return alert("Please fill all fields.");orders.push({id:"STX"+Date.now(),customer:n,phone:ph,address:ad,items:[...cart],total:cart.reduce((a,x)=>a+x.price*x.qty,0),status:"Pending",date:new Date().toLocaleString()});cart=[];save();document.getElementById("box").innerHTML="<h2>Order received ✅</h2><p>Your order has been recorded in this prototype.</p><button class='yellow' onclick='closeModal()'>Continue</button>"}
+function account(){openModal();document.getElementById("box").innerHTML=`<h2>Customer Account</h2><input id="uname" class="field" placeholder="Name"><input id="uemail" class="field" placeholder="Email or phone"><input id="upass" class="field" type="password" placeholder="Password"><button class="yellow" style="width:100%" onclick="register()">Create Account</button><p class="muted">Demo accounts are stored only in this browser until a real database is connected.</p>`}
+function register(){let n=document.getElementById("uname").value.trim(),e=document.getElementById("uemail").value.trim(),p=document.getElementById("upass").value;if(!n||!e||!p)return alert("Fill all fields.");users.push({name:n,contact:e,created:new Date().toLocaleString()});save();document.getElementById("box").innerHTML="<h2>Account created ✅</h2><p>You are now registered in this prototype.</p><button class='yellow' onclick='closeModal()'>Close</button>"}
+function adminLogin(){openModal();document.getElementById("box").innerHTML=`<h2>STAX Admin</h2><p class="muted">Prototype access. A production site must use secure server-side authentication.</p><input id="apass" class="field" type="password" placeholder="Admin password"><button class="yellow" onclick="if(document.getElementById('apass').value==='staxadmin')admin()">Open Dashboard</button>`}
+function admin(){openModal();let revenue=orders.reduce((a,o)=>a+o.total,0);document.getElementById("box").innerHTML=`<h2>👑 STAX Admin Dashboard</h2><div class="statgrid"><div class="stat"><b>${users.length}</b><br>Customers</div><div class="stat"><b>${orders.length}</b><br>Orders</div><div class="stat"><b>${money(revenue)}</b><br>Recorded sales</div><div class="stat"><b>${products.length}</b><br>Products</div></div><h3>Customers</h3>${users.length?users.map(u=>`<div class="row"><span>👤 ${u.name}<br><small>${u.contact}</small></span><small>${u.created}</small></div>`).join(""):"<p>No customers registered in this browser yet.</p>"}<h3>Orders</h3>${orders.length?orders.map(o=>`<div class="row"><span><b>${o.id}</b><br>${o.customer} — ${money(o.total)}<br><small>${o.phone} · ${o.address}</small></span><b>${o.status}</b></div>`).join(""):"<p>No orders yet.</p>"}<p class="muted"><b>Important:</b> this dashboard is a local prototype. It does not yet receive customers from other phones.</p>`}
+function openModal(){document.getElementById("modal").classList.add("show")}function closeModal(){document.getElementById("modal").classList.remove("show")}
+renderProducts();save();
+</script></body></html>
